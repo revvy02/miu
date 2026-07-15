@@ -36,4 +36,6 @@ local function MiuStory(config, render)
 	end)
 end
 
-return MiuStory
+return {
+	MiuStory = MiuStory,
+}
