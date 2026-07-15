@@ -1,0 +1,21 @@
+name = "rvy/miu_ui_labs"
+version = "0.1.0"
+license = "MIT"
+private = true
+
+[engines]
+pesde = "^0.7.2"
+
+[target]
+environment = "roblox"
+build_files = ["src"]
+
+[indices]
+default = "https://github.com/pesde-pkg/index"
+
+[wally_indices]
+default = "https://github.com/UpliftGames/wally-index"
+
+[dependencies]
+miu = { wally = "revvy02/miu", version = "^0.1.0" }
+ui_labs = { wally = "pepeeltoro41/ui-labs", version = "^2.3.8" }
