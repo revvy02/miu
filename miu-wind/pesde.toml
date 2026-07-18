@@ -1,0 +1,21 @@
+name = "rvy/miu_wind"
+version = "0.1.0"
+license = "MIT"
+private = true
+
+[engines]
+pesde = "^0.7.2"
+
+[target]
+environment = "roblox"
+build_files = ["src"]
+
+[indices]
+default = "https://github.com/pesde-pkg/index"
+
+[wally_indices]
+default = "https://github.com/UpliftGames/wally-index"
+
+[dependencies]
+miu = { wally = "revvy02/miu", version = "^0.1.1" }
+miu_px = { wally = "revvy02/miu-px", version = "^0.1.0" }

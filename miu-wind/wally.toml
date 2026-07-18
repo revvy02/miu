@@ -1,0 +1,14 @@
+[package]
+name = "revvy02/miu-wind"
+description = "Declarative styling for miu — style rules, sheets, wind/theme/markdown rule sets"
+version = "0.1.0"
+license = "MIT"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+
+exclude = ["**"]
+include = ["src", "src/**", "wally.toml", "default.project.json", "LICENSE"]
+
+[dependencies]
+miu = "revvy02/miu@0.1.1"
+miu_px = "revvy02/miu-px@0.1.0"
