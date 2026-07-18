@@ -12,7 +12,7 @@
 	direct ScrollingFrame children. The overlay avoids this.
 ]]
 
-local Miu = require(script.Parent.Parent.miu)
+local Miu = require("../miu")
 local Instance = Miu.Instance
 
 local Dimensions = require("./Dimensions")

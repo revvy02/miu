@@ -9,7 +9,7 @@
 		withSpacing(inner, n) — adds gaps between items
 ]]
 
-local Miu = require(script.Parent.Parent.miu)
+local Miu = require("../miu")
 
 export type UDimRect = {
 	size: UDim2,

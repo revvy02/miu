@@ -1,11 +1,11 @@
-local UILabs = require(script.Parent.Parent.ui_labs)
+local UILabs = require("../ui_labs")
 
-local Miu = require(script.Parent.Parent.miu)
+local Miu = require("../miu")
 local Instance = Miu.Instance
-local MiuStory = require(script.Parent.Parent.miu_ui_labs).MiuStory
-local px = require(script.Parent.Parent.miu_px).px
+local MiuStory = require("../miu_ui_labs").MiuStory
+local px = require("../miu_px").px
 
-local MiuVirtualList = require(script.Parent)
+local MiuVirtualList = require("../miu-virtual-list")
 local VirtualList = MiuVirtualList.VirtualList
 local Dimensions = MiuVirtualList.Dimensions
 
