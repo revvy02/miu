@@ -1,7 +1,7 @@
 [package]
 name = "revvy02/miu-virtual-list"
 description = "Virtualized list rendering for miu"
-version = "0.1.0"
+version = "0.2.0"
 license = "MIT"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
@@ -11,3 +11,6 @@ include = ["src", "src/**", "wally.toml", "default.project.json", "LICENSE"]
 
 [dependencies]
 miu = "revvy02/miu@0.1.0"
+miu_ui_labs = "revvy02/miu-ui-labs@0.2.0"
+miu_px = "revvy02/miu-px@0.1.0"
+ui_labs = "pepeeltoro41/ui-labs@2.3.8"
