@@ -1,4 +1,4 @@
-local RetainedScope = require(script.Parent.Parent.retained_scope)
+local RetainedScope = require("../retained_scope")
 
 export type MiuNode<T = {}> = RetainedScope.Node<T>
 

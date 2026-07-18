@@ -1,8 +1,8 @@
 local RunService = game:GetService("RunService")
 
-local Miu = require(script.Parent.miu)
+local Miu = require("./miu")
 local Portal = Miu.Portal
-local UILabs = require(script.Parent.ui_labs)
+local UILabs = require("./ui_labs")
 
 -- Publish miu root to real _G so rodeo can access the live tree
 -- (UI Labs sandboxes _G per-story, OriginalG is the unsandboxed one)
