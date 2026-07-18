@@ -1,0 +1,11 @@
+[tools]
+"ubi:UpliftGames/wally" = "v0.3.2"
+"ubi:pesde-pkg/pesde" = "latest"
+
+[tasks.install]
+description = "Install packages (pesde)"
+run = "pesde install"
+
+[tasks.publish-wally]
+description = "Publish the package to the wally registry"
+run = "wally publish"
