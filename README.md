@@ -1,6 +1,6 @@
 # miu
 
-Miu is an elegant immediate mode ui library inspired by Imgui and React.
+Miu is an elegant immediate mode library for Roblox, inspired by Imgui and React.
 
 ## Status
 
