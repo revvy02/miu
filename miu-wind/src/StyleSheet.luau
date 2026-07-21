@@ -1,7 +1,7 @@
-local Instance = require("../miu").Instance
+local Element = require("../miu").Element
 
 local function StyleSheet(fn)
-	return Instance("StyleSheet", {}, fn).instance
+	return Element("StyleSheet", {}, fn).instance
 end
 
 return StyleSheet

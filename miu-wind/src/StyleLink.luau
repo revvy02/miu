@@ -1,7 +1,7 @@
-local Instance = require("../miu").Instance
+local Element = require("../miu").Element
 
 local function StyleLink(styleSheet)
-	return Instance("StyleLink", { StyleSheet = styleSheet })
+	return Element("StyleLink", { StyleSheet = styleSheet })
 end
 
 return StyleLink

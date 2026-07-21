@@ -1,4 +1,4 @@
-local Instance = require("../miu").Instance
+local Element = require("../miu").Element
 
 -- True if `new` differs from `old` (added/changed/removed keys), so we only
 -- write to the instance when something actually changed.
@@ -25,7 +25,7 @@ end
 --                value changes (Roblox StyleRule:SetPropertyTransitions).
 --   priority:    rule priority (default 0).
 local function StyleRule(selector, properties, transitions, priority)
-	return Instance("StyleRule", { Name = selector, Selector = selector, Priority = priority or 0 }, function(node)
+	return Element("StyleRule", { Name = selector, Selector = selector, Priority = priority or 0 }, function(node)
 		if properties and changed(node.ruleProperties, properties) then
 			node.instance:SetProperties(properties)
 			node.ruleProperties = properties

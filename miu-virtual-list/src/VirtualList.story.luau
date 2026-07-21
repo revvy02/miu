@@ -1,7 +1,7 @@
 local UILabs = require("../ui_labs")
 
 local Miu = require("../miu")
-local Instance = Miu.Instance
+local Element = Miu.Element
 local MiuStory = require("../miu_ui_labs").MiuStory
 local px = require("../miu_px").px
 
@@ -45,7 +45,7 @@ return MiuStory({
 		dims = Dimensions.withSpacing(dims, px(controls.spacing))
 	end
 
-	Instance("Frame", {
+	Element("Frame", {
 		Size = UDim2.fromScale(1, 1),
 		BackgroundColor3 = Color3.fromRGB(20, 20, 30),
 	}, function()
@@ -54,11 +54,11 @@ return MiuStory({
 			dimensions = dims,
 			direction = controls.direction,
 		}, function(item, index)
-			Instance("Frame", {
+			Element("Frame", {
 				Size = UDim2.fromScale(1, 1),
 				BackgroundColor3 = COLORS[(index - 1) % #COLORS + 1],
 			}, function()
-				Instance("TextLabel", {
+				Element("TextLabel", {
 					Size = UDim2.fromScale(1, 1),
 					BackgroundTransparency = 1,
 					Text = `Item {item.index}`,

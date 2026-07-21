@@ -1,5 +1,5 @@
 local Context = require("@self/Context")
-local Instance = require("@self/Instance")
+local Element = require("@self/Element")
 local Portal = require("@self/Portal")
 local scope = require("@self/scope")
 
@@ -11,7 +11,7 @@ local Miu = setmetatable({
 	peek = scope.peek,
 	root = scope.root,
 	Context = Context,
-	Instance = Instance,
+	Element = Element,
 	Portal = Portal,
 }, {
 	__call = function(_, id, fn)

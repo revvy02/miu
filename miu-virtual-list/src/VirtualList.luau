@@ -13,7 +13,7 @@
 ]]
 
 local Miu = require("../miu")
-local Instance = Miu.Instance
+local Element = Miu.Element
 
 local Dimensions = require("./Dimensions")
 
@@ -67,7 +67,7 @@ local function push(props, render)
 	local direction = props.direction or "y"
 
 	-- Outer container frame
-	Instance.push("Frame", {
+	Element.push("Frame", {
 		tags = props.tags,
 		id = props.id,
 		Size = props.Size or UDim2.fromScale(1, 1),
@@ -80,7 +80,7 @@ local function push(props, render)
 	})
 
 	-- ScrollingFrame — scroll input + scrollbar, empty inside
-	local scrollNode = Instance("ScrollingFrame", {
+	local scrollNode = Element("ScrollingFrame", {
 		id = "scroll",
 		tags = props.tags,
 		Size = UDim2.fromScale(1, 1),
@@ -100,7 +100,7 @@ local function push(props, render)
 	-- Overlay frame — renders items here, clips descendants
 	-- Size matches ScrollingFrame's AbsoluteWindowSize (viewport minus scrollbar)
 	local windowSize = if scrollInstance then scrollInstance.AbsoluteWindowSize else Vector2.zero
-	Instance.push("Frame", {
+	Element.push("Frame", {
 		id = "overlay",
 		BackgroundTransparency = 1,
 		ClipsDescendants = true,
@@ -137,7 +137,7 @@ local function push(props, render)
 		local rect = Dimensions.getUDimRect(dimensions, data[i], i, windowSize, direction)
 		local adjustedPosition = Dimensions.adjustForScroll(rect.position, scrollAxis, direction)
 
-		Instance.push("Frame", {
+		Element.push("Frame", {
 			id = i,
 			BackgroundTransparency = 1,
 			Size = rect.size,
@@ -159,13 +159,13 @@ local function push(props, render)
 			end
 		end
 
-		Instance.pop()
+		Element.pop()
 	end
 end
 
 local function pop()
-	Instance.pop() -- overlay
-	Instance.pop() -- outer container
+	Element.pop() -- overlay
+	Element.pop() -- outer container
 end
 
 return setmetatable({
