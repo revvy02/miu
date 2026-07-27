@@ -1,4 +1,5 @@
 local Context = require("@self/Context")
+local DeltaTime = require("@self/DeltaTime")
 local Element = require("@self/Element")
 local Portal = require("@self/Portal")
 local scope = require("@self/scope")
@@ -11,6 +12,7 @@ local Miu = setmetatable({
 	peek = scope.peek,
 	root = scope.root,
 	Context = Context,
+	DeltaTime = DeltaTime,
 	Element = Element,
 	Portal = Portal,
 }, {

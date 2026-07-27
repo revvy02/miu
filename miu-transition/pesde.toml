@@ -1,0 +1,23 @@
+name = "rvy/miu_transition"
+version = "0.1.0"
+license = "MIT"
+private = true
+
+[engines]
+pesde = "^0.7.2"
+
+[target]
+environment = "roblox"
+build_files = ["src"]
+
+[indices]
+default = "https://github.com/pesde-pkg/index"
+
+[wally_indices]
+default = "https://github.com/UpliftGames/wally-index"
+
+[dependencies]
+miu = { wally = "revvy02/miu", version = "^0.3.0" }
+miu_ui_labs = { wally = "revvy02/miu-ui-labs", version = "^0.4.0" }
+miu_px = { wally = "revvy02/miu-px", version = "^0.1.0" }
+ui_labs = { wally = "pepeeltoro41/ui-labs", version = "^2.3.8" }
