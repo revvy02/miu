@@ -118,6 +118,12 @@ local function push<T>(class, props): MiuNode<T>
 
 	if not node.mounted then
 		node.instance = Instance.new(class)
+		-- Name the instance after its id so the Explorer reads as the tree you wrote. Auto-cursor
+		-- ids are numbers, which still beats a pile of identically named siblings. Creation only —
+		-- an id never changes, and an explicit Name prop wins (update() writes it right below).
+		if props.Name == nil then
+			node.instance.Name = tostring(node.id)
+		end
 		node.instance.Parent = node.parent.instance
 
 		node.events = {}

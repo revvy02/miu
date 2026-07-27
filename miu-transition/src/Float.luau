@@ -83,7 +83,6 @@ local function Float(props, renderChildren)
 
 	return Element("Frame", {
 		id = props.id,
-		Name = "Float" .. tostring(props.id),
 		BackgroundTransparency = props.backgroundTransparency or 1,
 		BackgroundColor3 = props.backgroundColor3,
 		Position = props.position,
@@ -96,8 +95,7 @@ local function Float(props, renderChildren)
 	}, function(container)
 		local content = Element("Frame", {
 			tags = props.tags,
-			id = "content",
-			Name = "Content",
+			id = "Content",
 			BackgroundTransparency = 1,
 			AutomaticSize = automaticSize,
 			AnchorPoint = contentAnchorPoint,
@@ -119,8 +117,7 @@ local function Float(props, renderChildren)
 				Vector2.new(containerSize.X.Scale * parentSize.X + containerSize.X.Offset, containerSize.Y.Scale * parentSize.Y + containerSize.Y.Offset)
 
 			Element("Frame", {
-				id = "floatingChildren",
-				Name = "FloatingChildren",
+				id = "FloatingChildren",
 				BackgroundTransparency = 1,
 				Size = UDim2.fromOffset(untransformedSize.X, untransformedSize.Y),
 				Position = contentPosition,
