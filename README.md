@@ -1,3 +1,4 @@
+# miu
 
 miu is a retained state library. Primary use case is for elegant immediate mode ui. You can write ui code declaratively by interleaving it directly in your ecs code. Immediate mode ui has overhead, but the overhead is explicit and easily visible, and miu is also faster than things like iris that depend on `debug.info`.
 
@@ -65,35 +66,36 @@ Portal("leaderboard", localPlayer.PlayerGui, function()
 		IgnoreGuiInset = false,
 		ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
 	}, function()
-	Element("Frame", {
-		AutomaticSize = Enum.AutomaticSize.XY,
-		BackgroundTransparency = 1,
-		Size = UDim2.fromScale(0, 0),
-	}, function()
-		Element("UIListLayout", {
-			-- props for vertical layout
-		})
-		for e, player, score in world:query(cts.Player, cts.Score) do
-			Element("Frame", {
-				AutomaticSize = Enum.AutomaticSize.XY,
-				BackgroundTransparency = 1,
-				Size = UDim2.fromScale(0, 0),
-			}, function()
-				Element("UIListLayout", {
-					-- props for horizontal layout
-				})
-				Element("TextLabel", {
-					Text = player.Name,
-					TextSize = 20,
-					AutomaticSize = Enum.AutomaticSize.XY
-				})
-				Element("TextLabel", {
-					Text = tostring(score)
-					TextSize = 20,
-					AutomaticSize = Enum.AutomaticSize.XY
-				})
-			end)
-		end
+		Element("Frame", {
+			AutomaticSize = Enum.AutomaticSize.XY,
+			BackgroundTransparency = 1,
+			Size = UDim2.fromScale(0, 0),
+		}, function()
+			Element("UIListLayout", {
+				-- props for vertical layout
+			})
+			for e, player, score in world:query(cts.Player, cts.Score) do
+				Element("Frame", {
+					AutomaticSize = Enum.AutomaticSize.XY,
+					BackgroundTransparency = 1,
+					Size = UDim2.fromScale(0, 0),
+				}, function()
+					Element("UIListLayout", {
+						-- props for horizontal layout
+					})
+					Element("TextLabel", {
+						Text = player.Name,
+						TextSize = 20,
+						AutomaticSize = Enum.AutomaticSize.XY
+					})
+					Element("TextLabel", {
+						Text = tostring(score),
+						TextSize = 20,
+						AutomaticSize = Enum.AutomaticSize.XY
+					})
+				end)
+			end
+		end)
 	end)
 end)
 ```
