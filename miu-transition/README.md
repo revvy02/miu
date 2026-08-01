@@ -1,9 +1,5 @@
 # miu-transition
 
-Animation primitives for miu. Everything here is immediate mode: call it every frame, it eases toward whatever you asked for this frame. There is no tween object to start or cancel — changing the goal mid-flight just retargets, so everything is reversible for free.
-
-Exports: `Smooth`, `Transition`, `TransitionList`, `Float`, `LazyCanvas`, `Activated`, `RemovingList`, `RemovingDictionary`. This README covers the two you'll reach for most.
-
 ## Smooth
 
 Framerate-independent easing toward a goal, one call per frame:
