@@ -2,6 +2,7 @@ local RunService = game:GetService("RunService")
 
 local Miu = require("./miu")
 local Portal = Miu.Portal
+local Px = require("./miu_px")
 local UILabs = require("./ui_labs")
 
 -- Publish miu root to real _G so rodeo can access the live tree
@@ -23,7 +24,10 @@ local function MiuStory(config, render)
 
 		local connection = RunService.PreRender:Connect(function()
 			Portal(props.target, "story", function()
-				render(controls, props.target)
+				-- Stories scale to the story canvas, not the monitor
+				Px.scope({ holder = props.target }, function()
+					render(controls, props.target)
+				end)
 			end)
 		end)
 

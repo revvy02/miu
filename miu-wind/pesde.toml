@@ -1,5 +1,5 @@
 name = "rvy/miu_wind"
-version = "0.3.0"
+version = "0.4.0"
 license = "MIT"
 private = true
 
@@ -18,4 +18,4 @@ default = "https://github.com/UpliftGames/wally-index"
 
 [dependencies]
 miu = { wally = "revvy02/miu", version = "^0.3.0" }
-miu_px = { wally = "revvy02/miu-px", version = "^0.1.0" }
+miu_px = { wally = "revvy02/miu-px", version = "^0.2.0" }
