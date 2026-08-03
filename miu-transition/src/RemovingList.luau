@@ -9,14 +9,19 @@ local Miu = require("../miu")
 	reappears before its lifetime expires.
 
 	Records persist per key and are refreshed in place each frame:
-		{ index, key, value, timestamp }
+		{ index, key, value, timestamp, seq }
 		- index: position in the source array (remembered while removing)
 		- key: from keyer(item), or item.id
 		- value: the source item (last seen)
 		- timestamp: first-seen time, preserved across frames and recovery
+		- seq: first-seen order, strictly increasing
 
-	Entries sort by (index, timestamp): items follow input order, removed
-	items hold their remembered position, ties order by first appearance.
+	Entries sort by (index, seq): items follow input order, removed items
+	hold their remembered position, and ties order by first appearance.
+	The tiebreak must be `seq`, not `timestamp`: same-frame records share
+	one clock reading, and a removed row ties on index with the row that
+	shifted up into its slot — with equal timestamps the sort is arbitrary
+	and the exiting row can jump below its successor mid-animation.
 
 	Returns (entries, removing):
 		entries: { record } — sorted, rebuilt in place each frame
@@ -32,11 +37,11 @@ local Miu = require("../miu")
 		end
 ]]
 
-local function byIndexThenTimestamp(a, b)
+local function byIndexThenSeq(a, b)
 	if a.index ~= b.index then
 		return a.index < b.index
 	end
-	return a.timestamp < b.timestamp
+	return a.seq < b.seq
 end
 
 local function RemovingList(items, keyer, lifetime)
@@ -67,7 +72,9 @@ local function RemovingList(items, keyer, lifetime)
 			record.value = item
 			record.stamp = frame
 		else
-			records[key] = { index = i, key = key, value = item, timestamp = t0, stamp = frame }
+			local seq = (state.seq or 0) + 1
+			state.seq = seq
+			records[key] = { index = i, key = key, value = item, timestamp = t0, seq = seq, stamp = frame }
 		end
 		if removing[key] then -- cancel removal
 			removing[key] = nil
@@ -95,7 +102,7 @@ local function RemovingList(items, keyer, lifetime)
 	for _, record in records do
 		table.insert(entries, record)
 	end
-	table.sort(entries, byIndexThenTimestamp)
+	table.sort(entries, byIndexThenSeq)
 
 	return entries, removing
 end

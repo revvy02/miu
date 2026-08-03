@@ -43,8 +43,16 @@ local function applyTransform(size: UDim2, widthTransform, heightTransform): UDi
 		return UDim2.new(x.Scale * widthTransform, xo * widthTransform + PIXEL_BIAS, y.Scale, newYOffset + PIXEL_BIAS)
 	end
 
-	-- Numeric transforms: multiply both scale and offset
-	return UDim2.new(x.Scale * widthTransform, xo * widthTransform + PIXEL_BIAS, y.Scale * heightTransform, yo * heightTransform + PIXEL_BIAS)
+	-- Numeric transforms: multiply both scale and offset. The bias scales with the
+	-- transform so a zero transform is EXACTLY zero: a flat bias leaves a collapsed
+	-- row ~1px tall until its removal lifetime expires, and that pixel popping out
+	-- at unmount reads as a one-frame flicker at the end of the exit animation.
+	return UDim2.new(
+		x.Scale * widthTransform,
+		xo * widthTransform + PIXEL_BIAS * widthTransform,
+		y.Scale * heightTransform,
+		yo * heightTransform + PIXEL_BIAS * heightTransform
+	)
 end
 
 local function computeContentSize(size: UDim2, automaticSize: Enum.AutomaticSize?): UDim2
