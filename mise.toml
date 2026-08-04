@@ -1,5 +1,8 @@
 # Monorepo toolchain: rwork (dev place sync) + rojo/darklua it shells to,
 # pesde (workspace installs) + wally (publishing), rodeo for headless checks.
+[env]
+_.file = ".env"
+
 [tools]
 stylua = "latest"
 "ubi:Kampfkarren/selene" = "latest"
