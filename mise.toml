@@ -15,5 +15,5 @@ description = "Install all workspace members (pesde)"
 run = "pesde install"
 
 [tasks.dev]
-description = "Live-sync the dev place (rwork)"
-run = "rwork sync"
+description = "Build + open the dev place, then live-sync (rwork)"
+run = "rwork dev"
