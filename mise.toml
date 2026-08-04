@@ -1,0 +1,19 @@
+# Monorepo toolchain: rwork (dev place sync) + rojo/darklua it shells to,
+# pesde (workspace installs) + wally (publishing), rodeo for headless checks.
+[tools]
+stylua = "latest"
+"ubi:Kampfkarren/selene" = "latest"
+"ubi:rojo-rbx/rojo" = "7.7.0"
+"ubi:pesde-pkg/pesde" = "latest"
+"ubi:UpliftGames/wally" = "v0.3.2"
+"ubi:revvy02/darklua" = "v0.19.1"
+"ubi:revvy02/rodeo" = "v1.2.2-rc.2"
+"ubi:revvy02/rwork" = "v0.11.0"
+
+[tasks.install]
+description = "Install all workspace members (pesde)"
+run = "pesde install"
+
+[tasks.dev]
+description = "Live-sync the dev place (rwork)"
+run = "rwork sync"
