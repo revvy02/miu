@@ -93,7 +93,9 @@ local function resolve(explicit, presetValue, default)
 end
 
 local function Transition(props, fn)
-	local preset = if props.preset ~= nil then PRESETS[props.preset] or error(`Transition: unknown preset "{props.preset}"`, 2) else NO_PRESET
+	local preset = if props.preset ~= nil
+		then PRESETS[props.preset] or error(`Transition: unknown preset "{props.preset}"`, 2)
+		else NO_PRESET
 
 	local dt = DeltaTime()
 	local show = props.show
@@ -159,6 +161,11 @@ local function Transition(props, fn)
 	local visible = state.alpha < 1
 
 	Float({
+		-- Identity-keyed container: without this the row container falls back to an
+		-- AUTO-CURSOR id while the animation state above is keyed by props.id — the
+		-- two key spaces shear whenever list positions shift mid-removal (containers
+		-- adopted by the wrong records: duplicated rows, frozen ghost cards).
+		id = props.id,
 		widthTransform = props.widthTransform or animateWidthTransform and (1 - state.alpha) or 1,
 		heightTransform = props.heightTransform or animateHeightTransform and (1 - state.alpha) or 1,
 
