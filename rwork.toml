@@ -1,0 +1,14 @@
+# Dev place for the miu monorepo: every package mounted under
+# ReplicatedStorage.pkgs, folder names = require aliases, so the packages'
+# relative string requires ("../miu", "./Float") resolve NATIVELY in the DOM —
+# no linkers, no require conversion. Cross-package edits are live (core miu
+# edits show up in miu-transition stories immediately). `vendor/` holds the two
+# external deps (ui-labs, retained-scope) copied from their published packages.
+# miu-virtual-list mounts under its DASH name: its story self-requires
+# "../miu-virtual-list" (the installed-package folder name); nothing else
+# requires it, so the alias form isn't needed.
+#
+# Usage: `rwork sync`, connect the Rojo plugin in any open place, open UI Labs.
+[build.dev]
+project = "dev.project.json"
+src = "dev"

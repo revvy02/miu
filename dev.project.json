@@ -1,0 +1,20 @@
+{
+	"name": "miu-dev",
+	"tree": {
+		"$className": "DataModel",
+		"ReplicatedStorage": {
+			"$className": "ReplicatedStorage",
+			"pkgs": {
+				"$className": "Folder",
+				"miu": { "$path": "miu/src" },
+				"miu_px": { "$path": "miu-px/src" },
+				"miu_transition": { "$path": "miu-transition/src" },
+				"miu_ui_labs": { "$path": "miu-ui-labs/src" },
+				"miu-virtual-list": { "$path": "miu-virtual-list/src" },
+				"miu_wind": { "$path": "miu-wind/src" },
+				"retained_scope": { "$path": "vendor/retained_scope" },
+				"ui_labs": { "$path": "vendor/ui_labs" }
+			}
+		}
+	}
+}
