@@ -5,6 +5,7 @@ local Portal = require("@self/Portal")
 local scope = require("@self/scope")
 
 export type MiuNode<T = {}> = scope.MiuNode<T>
+export type Context<T> = Context.Context<T>
 
 local Miu = setmetatable({
 	push = scope.push,

@@ -2,10 +2,10 @@ export type Context<T> = typeof(setmetatable(
 	{} :: {
 		push: (value: T) -> (),
 		pop: () -> (),
-		consume: () -> T,
+		peek: () -> T,
 	},
 	{} :: {
-		__call: ((self: unknown) -> T) & ((self: unknown, value: T, fn: () -> ()) -> ()),
+		__call: ((self: unknown) -> T) & ((self: unknown, value: T, fn: (value: T) -> ()) -> T),
 	}
 ))
 
@@ -20,24 +20,28 @@ local function Context<T>(default: T): Context<T>
 		table.remove(stack)
 	end
 
-	local function consume(): T
+	local function peek(): T
 		return stack[#stack]
+	end
+
+	local function scope(value: T, fn: (T) -> ()): T
+		push(value)
+		fn(value)
+		pop()
+		return value
 	end
 
 	return (
 		setmetatable({
 			push = push,
 			pop = pop,
-			consume = consume,
+			peek = peek,
 		}, {
-			__call = function(_, value: T, fn: () -> ())
+			__call = function(_, value: T, fn: (T) -> ()): T
 				if value == nil and fn == nil then
-					return consume()
+					return peek()
 				else
-					push(value)
-					fn()
-					pop()
-					return nil
+					return scope(value, fn)
 				end
 			end,
 		})
