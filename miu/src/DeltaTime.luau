@@ -2,7 +2,7 @@ local scope = require("./scope")
 
 -- Seconds since this call site last ran, kept on its own persistent node so
 -- every caller measures its own cadence.
-local function DeltaTime(id)
+local function DeltaTime(id): number
 	local node = scope.push(id)
 
 	local now = os.clock()
