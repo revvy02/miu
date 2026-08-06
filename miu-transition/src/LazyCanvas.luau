@@ -31,6 +31,16 @@ local function push(props)
 		ZIndex = props.zIndex,
 	})
 
+	-- Measurement note (probe-verified): the scale-sized twins are FINE inside an
+	-- auto-size chain — the engine propagates descendant size changes through
+	-- them correctly. (An earlier 'circular auto-size' theory here was wrong.)
+	-- The real engine rule to know: an AutomaticSize frame WITHOUT a UIListLayout
+	-- measures the DEEP descendant bounding box and ignores ClipsDescendants, so
+	-- content overflowing a clipped frame leaks its full extent into ancestor
+	-- measurements. A UIListLayout on the auto frame — or anywhere between it and
+	-- the clipped frame — switches measurement to layout content size and stops
+	-- the leak. Callers animating a clipped row inside a measured Transition
+	-- should put a UIListLayout in their content.
 	local canvas = Element("CanvasGroup", {
 		BackgroundTransparency = 1,
 		GroupTransparency = transparency,

@@ -61,6 +61,7 @@ return MiuStory({
 	summary = "Animated show/hide with position, transparency, and transform animations",
 	controls = {
 		show = true,
+		nestedInnerShow = true,
 	},
 }, function(controls)
 	Element("ScrollingFrame", {
@@ -124,7 +125,9 @@ return MiuStory({
 					Padding = UDim.new(0, px(8)),
 				})
 
-				for _, name in { "slideDiagonal", "slideDown", "fade", "collapseHeight", "collapseWidth", "collapseBoth" } do
+				for _, name in
+					{ "slideDiagonal", "slideDown", "fade", "collapseHeight", "collapseWidth", "collapseBoth" }
+				do
 					Element("Frame", {
 						id = `preset-slot-{name}`,
 						Size = UDim2.fromOffset(px(150), px(90)),
@@ -368,7 +371,10 @@ return MiuStory({
 											Text = `Inner {i}`,
 											TextColor3 = Color3.new(1, 1, 1),
 											TextSize = px(13),
-											FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold),
+											FontFace = Font.new(
+												"rbxasset://fonts/families/GothamSSm.json",
+												Enum.FontWeight.Bold
+											),
 										})
 									end)
 								end
@@ -376,6 +382,79 @@ return MiuStory({
 						end
 					end)
 				end
+			end)
+		end)
+
+		-- Nested + AutomaticSize: the outer's measured height tracks the inner's
+		-- animation LIVE. The outer is auto-sized over its content; the inner is an
+		-- auto-sized collapseHeight Transition on its own toggle. While the inner
+		-- grows/collapses (its container height animating every frame), the outer's
+		-- measurement follows it through the canvas layers — auto chains propagate
+		-- through scale-sized frames fine (probe-verified).
+		Element("Frame", {
+			Size = UDim2.fromScale(1, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
+			BackgroundTransparency = 1,
+		}, function()
+			Element("UIListLayout", { Padding = UDim.new(0, px(8)) })
+
+			header("Nested + AutomaticSize.Y — outer measures the inner's animation (nestedInnerShow)")
+
+			Transition({
+				id = "nested-auto-outer",
+				show = controls.show,
+				size = UDim2.fromOffset(px(280), 0),
+				automaticSize = Enum.AutomaticSize.Y,
+				backgroundColor3 = Color3.fromRGB(35, 38, 48),
+				backgroundTransparency = 0,
+			}, function(outerVisible)
+				if not outerVisible then
+					return
+				end
+
+				Element("UIListLayout", { Padding = UDim.new(0, px(6)) })
+				Element("UIPadding", {
+					PaddingTop = UDim.new(0, px(8)),
+					PaddingBottom = UDim.new(0, px(8)),
+					PaddingLeft = UDim.new(0, px(8)),
+					PaddingRight = UDim.new(0, px(8)),
+				})
+
+				Element("TextLabel", {
+					id = "static",
+					Size = UDim2.new(1, 0, 0, px(20)),
+					BackgroundTransparency = 1,
+					Text = "Static line (always here)",
+					TextColor3 = LABEL_COLOR,
+					TextSize = px(14),
+					LayoutOrder = 1,
+				})
+
+				Transition({
+					id = "nested-auto-inner",
+					show = controls.nestedInnerShow,
+					preset = "collapseHeight",
+					size = UDim2.fromScale(1, 0),
+					automaticSize = Enum.AutomaticSize.Y,
+					backgroundColor3 = Color3.fromRGB(60, 50, 80),
+					backgroundTransparency = 0,
+					layoutOrder = 2,
+					clipsDescendants = true,
+				}, function(innerVisible)
+					if innerVisible then
+						autoSizeContent()
+					end
+				end)
+
+				Element("TextLabel", {
+					id = "trailing",
+					Size = UDim2.new(1, 0, 0, px(20)),
+					BackgroundTransparency = 1,
+					Text = "Trailing line (rides the reflow)",
+					TextColor3 = LABEL_COLOR,
+					TextSize = px(14),
+					LayoutOrder = 3,
+				})
 			end)
 		end)
 	end)
