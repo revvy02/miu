@@ -1,7 +1,66 @@
+local classes = require("./classes")
 local miu = require("./scope")
 local unmounting = require("./unmounting")
 
 type MiuNode<T = {}> = miu.MiuNode<T>
+type CreatableInstances = classes.CreatableInstances
+
+-- Derives the props type for a class-name singleton: every writable instance
+-- property (optional), plus the miu extras (id/attributes/tags/events). Signals
+-- are routed into `events` typed with their real handler signatures. The
+-- [string]: never indexers reject typos and wrong-class props.
+--
+-- KNOWN LIMITATION (luau-lang/luau#2608): the solver checks a table-literal
+-- argument against MiuProps<C> before reducing it, so literal props at push
+-- call sites error with the unreduced type until that fix lands. Props passed
+-- through an annotated variable, and all scalar checking, work today.
+-- selene: allow(undefined_variable) -- type aliases read as values inside type function bodies
+type function MiuProps(selector: type)
+	local cls = CreatableInstances:readproperty(selector)
+	assert(cls, "miu: not a creatable Instance class: " .. tostring(selector))
+
+	local props = types.newtable()
+	local events = types.newtable()
+	local current: any = cls
+	while current do
+		for name, prop in current:properties() do
+			local write = prop.write
+			if not write or props:readproperty(name) ~= nil or events:readproperty(name) ~= nil then
+				continue
+			end
+			if write:is("function") then
+				continue
+			end
+			if write:is("table") then
+				-- RBXScriptSignal shape: { Connect: (self, handler) -> ... }
+				local connect = write:readproperty(types.singleton("Connect"))
+				if connect and connect:is("function") then
+					local params = connect:parameters().head
+					if params and params[2] then
+						events:setproperty(name, types.optional(params[2]))
+						continue
+					end
+				end
+			end
+			props:setproperty(name, types.optional(write))
+		end
+		current = current:readparent()
+	end
+
+	events:setindexer(types.string, types.never)
+	props:setproperty(types.singleton("id"), types.optional(types.unionof(types.string, types.number)))
+	props:setproperty(
+		types.singleton("attributes"),
+		types.optional(types.newtable(nil, { index = types.string, readresult = types.any, writeresult = types.any }))
+	)
+	props:setproperty(
+		types.singleton("tags"),
+		types.optional(types.newtable(nil, { index = types.number, readresult = types.string, writeresult = types.string }))
+	)
+	props:setproperty(types.singleton("events"), types.optional(events))
+	props:setindexer(types.string, types.never)
+	return props
+end
 
 local MIU_PUSH = miu.push
 
@@ -112,12 +171,12 @@ local function update(node, newProps)
 	debug.profileend()
 end
 
-local function push<T>(class, props): MiuNode<T>
-	props = props or {}
+local function push<C, T>(class: C & (string | ""), propsIn: MiuProps<C>?): MiuNode<T>
+	local props: any = propsIn or {}
 	local node = MIU_PUSH(props.id)
 
 	if not node.mounted then
-		node.instance = Instance.new(class)
+		node.instance = Instance.new(class :: any)
 		-- Name the instance after its id so the Explorer reads as the tree you wrote. Auto-cursor
 		-- ids are numbers, which still beats a pile of identically named siblings. Creation only —
 		-- an id never changes, and an explicit Name prop wins (update() writes it right below).
@@ -145,7 +204,7 @@ local function pop()
 	reactor_pop()
 end
 
-local function scope<T>(class, props, fn): MiuNode<T>
+local function scope<C, T>(class: C & (string | ""), props: MiuProps<C>?, fn: ((MiuNode<T>) -> ())?): MiuNode<T>
 	local node = push(class, props)
 	if fn then
 		fn(node)
@@ -158,7 +217,7 @@ return setmetatable({
 	push = push,
 	pop = pop,
 }, {
-	__call = function(_, class, props, fn)
+	__call = function<C, T>(_, class: C & (string | ""), props: MiuProps<C>?, fn: ((MiuNode<T>) -> ())?): MiuNode<T>
 		return scope(class, props, fn)
 	end,
 })
