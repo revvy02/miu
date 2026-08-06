@@ -10,4 +10,4 @@ exclude = ["**"]
 include = ["src", "src/**", "wally.toml", "default.project.json", "LICENSE"]
 
 [dependencies]
-miu = "revvy02/miu@0.3.0"
+miu = "revvy02/miu@0.4.0"

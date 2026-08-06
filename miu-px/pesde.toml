@@ -17,4 +17,4 @@ default = "https://github.com/pesde-pkg/index"
 default = "https://github.com/UpliftGames/wally-index"
 
 [dependencies]
-miu = { wally = "revvy02/miu", version = "^0.3.0" }
+miu = { wally = "revvy02/miu", version = "^0.4.0" }
