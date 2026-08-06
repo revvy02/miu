@@ -1,11 +1,11 @@
-export type Context<T> = typeof(setmetatable(
+export type Context<In, Out = In> = typeof(setmetatable(
 	{} :: {
-		push: (value: T) -> (),
+		push: (value: In) -> (),
 		pop: () -> (),
-		peek: () -> T,
+		peek: () -> Out,
 	},
 	{} :: {
-		__call: ((self: unknown) -> T) & ((self: unknown, value: T, fn: (value: T) -> ()) -> T),
+		__call: ((self: unknown) -> Out) & ((self: unknown, value: In, fn: (value: Out) -> ()) -> In),
 	}
 ))
 
