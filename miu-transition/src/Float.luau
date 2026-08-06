@@ -35,7 +35,9 @@ local function applyTransform(size: UDim2, widthTransform, heightTransform): UDi
 	-- UDim transforms: affine on offset only, scale passes through
 	if typeof(widthTransform) == "UDim" then
 		local newXOffset = xo * widthTransform.Scale + widthTransform.Offset
-		local newYOffset = if typeof(heightTransform) == "UDim" then yo * heightTransform.Scale + heightTransform.Offset else yo * heightTransform
+		local newYOffset = if typeof(heightTransform) == "UDim"
+			then yo * heightTransform.Scale + heightTransform.Offset
+			else yo * heightTransform
 		local newYScale = if typeof(heightTransform) == "UDim" then y.Scale else y.Scale * heightTransform
 		return UDim2.new(x.Scale, newXOffset + PIXEL_BIAS, newYScale, newYOffset + PIXEL_BIAS)
 	elseif typeof(heightTransform) == "UDim" then
@@ -69,7 +71,11 @@ local function computeContentSize(size: UDim2, automaticSize: Enum.AutomaticSize
 	end
 end
 
-local function computeContainerSize(size: UDim2, contentAbsoluteSize: Vector2, automaticSize: Enum.AutomaticSize?): UDim2
+local function computeContainerSize(
+	size: UDim2,
+	contentAbsoluteSize: Vector2,
+	automaticSize: Enum.AutomaticSize?
+): UDim2
 	if automaticSize == Enum.AutomaticSize.Y then
 		return UDim2.new(size.X.Scale, size.X.Offset, 0, contentAbsoluteSize.Y)
 	elseif automaticSize == Enum.AutomaticSize.X then
@@ -115,14 +121,60 @@ local function Float(props, renderChildren)
 		-- synchronously, so with the children already in place this is the current frame's
 		-- true content size.
 
-		local contentAbsoluteSize = if automaticSize and content.instance then content.instance.AbsoluteSize else Vector2.new(size.X.Offset, size.Y.Offset)
+		-- AbsoluteSize is post-UIScale while Size offsets are pre-scale inputs, so any
+		-- measured absolute value must be divided by the accumulated ancestor scale before
+		-- being written back — otherwise a Float under UIScale s renders measured content
+		-- at s^2. The ruler derives that factor empirically: a known 100px offset input
+		-- read back through the render pipeline. It sits at container level on purpose: a
+		-- UIScale the caller renders inside Content (press feedback) is genuinely part of
+		-- the measured content size and is NOT divided out. Only the paths converting
+		-- absolute pixels to offsets need the factor, so the ruler only exists for them.
+		-- The analytical fix is scoped px (miu-px factor scopes): when all px quantities
+		-- route through px() and scaling is a scope factor, the factor is known without
+		-- measurement — Float would take it as a prop and the ruler becomes redundant
+		-- (or a cross-check assertion).
+		local derivedScale = 1
+		if automaticSize or props.renderFloatingChildren then
+			local ruler = Element("Frame", {
+				id = "UIScaleDeriver",
+				BackgroundTransparency = 1,
+				Size = UDim2.fromOffset(100, 0),
+				ZIndex = -1,
+			})
+			derivedScale = ruler.instance.AbsoluteSize.X / 100
+		end
+
+		-- Known limitation: wrapped AutomaticSize text under an auto Float measures only
+		-- the lines that fit the container's current height (engine clamps wrapped-text
+		-- auto measure to the constraining ancestor), so it locks at one line.
+		-- Workaround (verified): RichText = true — rich text measures through an
+		-- unclamped path and reports the full wrapped height at any ancestor height.
+		-- Otherwise give wrapped text a fixed-height row.
+		-- The corrected measurement is rounded to design-space integers: rendered
+		-- sizes are quantized to device pixels, so the raw division yields 24±ε that
+		-- wanders across pixel-rounding boundaries while an animating ancestor scale
+		-- converges (its exponential tail changes sub-pixel for seconds) — and with
+		-- PIXEL_BIAS parked next to a boundary, the rows visibly vibrate. Authored
+		-- content is integer design px; snapping to it removes the noise.
+		local contentAbsoluteSize
+		if automaticSize and content.instance and derivedScale > 0 then
+			local measured = content.instance.AbsoluteSize / derivedScale
+			contentAbsoluteSize = Vector2.new(math.round(measured.X), math.round(measured.Y))
+		else
+			contentAbsoluteSize = Vector2.new(size.X.Offset, size.Y.Offset)
+		end
 		local containerSize = computeContainerSize(size, contentAbsoluteSize, automaticSize)
 
 		if props.renderFloatingChildren then
-			-- Untransformed size for renderFloatingChildren
-			local parentSize = container.instance.Parent and container.instance.Parent.AbsoluteSize or Vector2.zero
-			local untransformedSize =
-				Vector2.new(containerSize.X.Scale * parentSize.X + containerSize.X.Offset, containerSize.Y.Scale * parentSize.Y + containerSize.Y.Offset)
+			-- Untransformed size for renderFloatingChildren, in pre-scale offset units:
+			-- the parent's AbsoluteSize is post-scale, so it gets the same division.
+			local parentSize = if container.instance.Parent ~= nil and derivedScale > 0
+				then container.instance.Parent.AbsoluteSize / derivedScale
+				else Vector2.zero
+			local untransformedSize = Vector2.new(
+				containerSize.X.Scale * parentSize.X + containerSize.X.Offset,
+				containerSize.Y.Scale * parentSize.Y + containerSize.Y.Offset
+			)
 
 			Element("Frame", {
 				id = "FloatingChildren",

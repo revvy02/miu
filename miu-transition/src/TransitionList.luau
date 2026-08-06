@@ -67,7 +67,8 @@ local function TransitionList(props, render)
 			-- rate. Flipping `show` mid-flight just retargets it from the current
 			-- value, so a close started mid-open unravels from exactly where the
 			-- reveal got to, and vice versa.
-			local totalDuration = props.animateTrailDuration or (count - 1) * (props.animateTrailDelay or DEFAULT_TRAIL_DELAY)
+			local totalDuration = props.animateTrailDuration
+				or (count - 1) * (props.animateTrailDelay or DEFAULT_TRAIL_DELAY)
 			local alpha = node.trailAlpha or 1
 			local target = if listShown then 0 else 1
 

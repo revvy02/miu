@@ -256,5 +256,98 @@ return MiuStory({
 
 	Element.pop()
 
+	-- AutomaticSize.Y + wrapped text
+	Element.push("Frame", {
+		Size = UDim2.fromScale(1, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
+		BackgroundTransparency = 1,
+	})
+	Element("UIListLayout", { Padding = UDim.new(0, px(8)) })
+
+	header("AutomaticSize.Y + TextWrapped — KNOWN LIMITATION: measures one line")
+
+	-- The wrapped label should wrap to several lines and drive the Float's height,
+	-- but the engine clamps wrapped AutomaticSize text to the lines that fit the
+	-- constraining ancestor's CURRENT height — and the Float container's height is
+	-- written from this very measurement, so the loop locks at one line (see the
+	-- known-limitation note in Float). This example exists to show the failure and
+	-- to verify any future fix: when it works, this Float should be several lines
+	-- tall with all the text visible.
+	Float({
+		size = UDim2.fromOffset(px(250), 0),
+		automaticSize = Enum.AutomaticSize.Y,
+		widthTransform = controls.widthTransform,
+		heightTransform = controls.heightTransform,
+		backgroundColor3 = Color3.fromRGB(60, 50, 45),
+		backgroundTransparency = 0,
+		renderFloatingChildren = renderOverlay,
+	}, function()
+		Element("UIPadding", {
+			PaddingTop = UDim.new(0, px(8)),
+			PaddingBottom = UDim.new(0, px(8)),
+			PaddingLeft = UDim.new(0, px(8)),
+			PaddingRight = UDim.new(0, px(8)),
+		})
+		Element("TextLabel", {
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
+			BackgroundTransparency = 1,
+			Text = "This wrapped label is long on purpose: it should wrap onto several lines and drive the Float's measured height, but the wrapped-text clamp locks it at a single line.",
+			TextColor3 = LABEL_COLOR,
+			TextSize = px(14),
+			TextWrapped = true,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			TextYAlignment = Enum.TextYAlignment.Top,
+		})
+	end)
+
+	Element.pop()
+
+	-- AutomaticSize.Y + wrapped text + RichText
+	Element.push("Frame", {
+		Size = UDim2.fromScale(1, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
+		BackgroundTransparency = 1,
+	})
+	Element("UIListLayout", { Padding = UDim.new(0, px(8)) })
+
+	header("AutomaticSize.Y + TextWrapped + RichText — the workaround")
+
+	-- Same setup as the broken example above, plus RichText = true: rich text goes
+	-- through a different measurement path that is NOT clamped by the constraining
+	-- ancestor's height. If this Float shows every line at full height while the
+	-- one above stays a single line, the workaround holds — wrapped auto text
+	-- under an auto Float needs RichText.
+	Float({
+		size = UDim2.fromOffset(px(250), 0),
+		automaticSize = Enum.AutomaticSize.Y,
+		widthTransform = controls.widthTransform,
+		heightTransform = controls.heightTransform,
+		backgroundColor3 = Color3.fromRGB(45, 55, 50),
+		backgroundTransparency = 0,
+		renderFloatingChildren = renderOverlay,
+	}, function()
+		Element("UIPadding", {
+			PaddingTop = UDim.new(0, px(8)),
+			PaddingBottom = UDim.new(0, px(8)),
+			PaddingLeft = UDim.new(0, px(8)),
+			PaddingRight = UDim.new(0, px(8)),
+		})
+		Element("TextLabel", {
+			Size = UDim2.new(1, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
+			BackgroundTransparency = 1,
+			RichText = true,
+			Text = "This wrapped label is just as long on purpose: with RichText enabled it should wrap onto several lines AND drive the Float's measured height, unlike its clamped sibling above.",
+			TextColor3 = LABEL_COLOR,
+			TextSize = px(14),
+			TextWrapped = true,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			TextYAlignment = Enum.TextYAlignment.Top,
+		})
+	end)
+
+	Element.pop()
+
 	Element.pop()
 end)
