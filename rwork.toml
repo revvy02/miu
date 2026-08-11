@@ -2,8 +2,12 @@
 # ReplicatedStorage.pkgs, folder names = require aliases, so the packages'
 # relative string requires ("../miu", "./Float") resolve NATIVELY in the DOM —
 # no linkers, no require conversion. Cross-package edits are live (core miu
-# edits show up in miu-transition stories immediately). `vendor/` holds the two
-# external deps (ui-labs, retained-scope) copied from their published packages.
+# edits show up in miu-transition stories immediately). The two external deps
+# (ui-labs, retained-scope) are pesde-installed (`pesde install`, exact pins in
+# pesde.toml) and mounted straight from their source dirs under
+# roblox_packages/.pesde/ — the $path embeds the version, so a bump must
+# update dev.project.json too. This works only because both are leaf packages
+# (no deps of their own), so mounting bare source severs nothing.
 # miu-virtual-list mounts under its DASH name: its story self-requires
 # "../miu-virtual-list" (the installed-package folder name); nothing else
 # requires it, so the alias form isn't needed.
