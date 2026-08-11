@@ -1,0 +1,20 @@
+name = "revvy02/miu_dev"
+version = "0.1.0"
+private = true
+
+[engines]
+pesde = "^0.7.2"
+
+[target]
+environment = "roblox"
+build_files = ["dev"]
+
+[wally_indices]
+default = "https://github.com/UpliftGames/wally-index"
+
+# External deps for the dev place. dev.project.json mounts their SOURCE
+# directly out of roblox_packages/.pesde/ (bypassing pesde's linkers), so
+# versions are pinned exactly — a bump must update the $path there too.
+[dependencies]
+retained_scope = { wally = "revvy02/retained-scope", version = "=0.1.0" }
+ui_labs = { wally = "pepeeltoro41/ui-labs", version = "=2.4.2" }
