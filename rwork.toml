@@ -12,7 +12,10 @@
 # "../miu-virtual-list" (the installed-package folder name); nothing else
 # requires it, so the alias form isn't needed.
 #
-# Usage: `rwork sync`, connect the Rojo plugin in any open place, open UI Labs.
+# No `src`: nothing here needs compiling, so the build is src-less (rwork
+# ≥0.12) — sync is just the staged project + rojo serve.
+#
+# Usage: `pesde install` once, then `rwork sync`, connect the Rojo plugin in
+# any open place, open UI Labs.
 [build.dev]
 project = "dev.project.json"
-src = "dev"

@@ -11,7 +11,7 @@ stylua = "latest"
 "ubi:UpliftGames/wally" = "v0.3.2"
 "ubi:revvy02/darklua" = "v0.19.1"
 "ubi:revvy02/rodeo" = "v1.2.2-rc.2"
-"ubi:revvy02/rwork" = "v0.11.0"
+"ubi:revvy02/rwork" = "v0.12.0"
 
 [tasks.install]
 description = "Install all workspace members (pesde)"
