@@ -1,7 +1,7 @@
 [package]
 name = "revvy02/miu-wind"
 description = "Declarative styling for miu — style rules, sheets, wind/theme/markdown rule sets"
-version = "0.4.0"
+version = "0.5.0"
 license = "MIT"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"

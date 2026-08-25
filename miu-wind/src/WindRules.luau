@@ -81,77 +81,25 @@ return function()
 	StyleRule(".group", { BackgroundTransparency = 1, Size = UDim2.fromScale(1, 1) })
 	StyleRule(".frame", { BackgroundTransparency = 0, Size = UDim2.new() })
 
-	-- Padding
-	StyleRule(".p-xs::UIPadding", {
-		PaddingTop = UDim.new(0, XS),
-		PaddingBottom = UDim.new(0, XS),
-		PaddingLeft = UDim.new(0, XS),
-		PaddingRight = UDim.new(0, XS),
-	})
-	StyleRule(".p-sm::UIPadding", {
-		PaddingTop = UDim.new(0, SM),
-		PaddingBottom = UDim.new(0, SM),
-		PaddingLeft = UDim.new(0, SM),
-		PaddingRight = UDim.new(0, SM),
-	})
-	StyleRule(".p-md::UIPadding", {
-		PaddingTop = UDim.new(0, MD),
-		PaddingBottom = UDim.new(0, MD),
-		PaddingLeft = UDim.new(0, MD),
-		PaddingRight = UDim.new(0, MD),
-	})
-	StyleRule(".p-lg::UIPadding", {
-		PaddingTop = UDim.new(0, XL),
-		PaddingBottom = UDim.new(0, XL),
-		PaddingLeft = UDim.new(0, XL),
-		PaddingRight = UDim.new(0, XL),
-	})
-
-	-- Per-direction padding (priority 1 overrides general p-*)
-	StyleRule(".pl-sm::UIPadding", { PaddingLeft = UDim.new(0, SM) }, nil, 1)
-	StyleRule(".pl-md::UIPadding", { PaddingLeft = UDim.new(0, MD) }, nil, 1)
-	StyleRule(".pl-lg::UIPadding", { PaddingLeft = UDim.new(0, XL) }, nil, 1)
-	StyleRule(".pr-sm::UIPadding", { PaddingRight = UDim.new(0, SM) }, nil, 1)
-	StyleRule(".pr-md::UIPadding", { PaddingRight = UDim.new(0, MD) }, nil, 1)
-	StyleRule(".pr-lg::UIPadding", { PaddingRight = UDim.new(0, XL) }, nil, 1)
-	StyleRule(".pt-sm::UIPadding", { PaddingTop = UDim.new(0, SM) }, nil, 1)
-	StyleRule(".pt-md::UIPadding", { PaddingTop = UDim.new(0, MD) }, nil, 1)
-	StyleRule(".pt-lg::UIPadding", { PaddingTop = UDim.new(0, XL) }, nil, 1)
-	StyleRule(".pb-sm::UIPadding", { PaddingBottom = UDim.new(0, SM) }, nil, 1)
-	StyleRule(".pb-md::UIPadding", { PaddingBottom = UDim.new(0, MD) }, nil, 1)
-	StyleRule(".pb-lg::UIPadding", { PaddingBottom = UDim.new(0, XL) }, nil, 1)
-
-	-- Direct forms — apply to an explicit UIPadding instance tagged with the class (mirrors
-	-- the pseudo rules above, for when you create the UIPadding yourself).
-	StyleRule(
-		"UIPadding.p-xs",
-		{ PaddingTop = UDim.new(0, XS), PaddingBottom = UDim.new(0, XS), PaddingLeft = UDim.new(0, XS), PaddingRight = UDim.new(0, XS) }
-	)
-	StyleRule(
-		"UIPadding.p-sm",
-		{ PaddingTop = UDim.new(0, SM), PaddingBottom = UDim.new(0, SM), PaddingLeft = UDim.new(0, SM), PaddingRight = UDim.new(0, SM) }
-	)
-	StyleRule(
-		"UIPadding.p-md",
-		{ PaddingTop = UDim.new(0, MD), PaddingBottom = UDim.new(0, MD), PaddingLeft = UDim.new(0, MD), PaddingRight = UDim.new(0, MD) }
-	)
-	StyleRule(
-		"UIPadding.p-lg",
-		{ PaddingTop = UDim.new(0, XL), PaddingBottom = UDim.new(0, XL), PaddingLeft = UDim.new(0, XL), PaddingRight = UDim.new(0, XL) }
-	)
-
-	StyleRule("UIPadding.pl-sm", { PaddingLeft = UDim.new(0, SM) }, nil, 1)
-	StyleRule("UIPadding.pl-md", { PaddingLeft = UDim.new(0, MD) }, nil, 1)
-	StyleRule("UIPadding.pl-lg", { PaddingLeft = UDim.new(0, XL) }, nil, 1)
-	StyleRule("UIPadding.pr-sm", { PaddingRight = UDim.new(0, SM) }, nil, 1)
-	StyleRule("UIPadding.pr-md", { PaddingRight = UDim.new(0, MD) }, nil, 1)
-	StyleRule("UIPadding.pr-lg", { PaddingRight = UDim.new(0, XL) }, nil, 1)
-	StyleRule("UIPadding.pt-sm", { PaddingTop = UDim.new(0, SM) }, nil, 1)
-	StyleRule("UIPadding.pt-md", { PaddingTop = UDim.new(0, MD) }, nil, 1)
-	StyleRule("UIPadding.pt-lg", { PaddingTop = UDim.new(0, XL) }, nil, 1)
-	StyleRule("UIPadding.pb-sm", { PaddingBottom = UDim.new(0, SM) }, nil, 1)
-	StyleRule("UIPadding.pb-md", { PaddingBottom = UDim.new(0, MD) }, nil, 1)
-	StyleRule("UIPadding.pb-lg", { PaddingBottom = UDim.new(0, XL) }, nil, 1)
+	-- Padding. Same step table as gap-*: xs=1 sm=4 md=8 lg=12 xl=16.
+	-- Arrays, not maps: StyleRule nodes are auto-cursor keyed, so emission order must
+	-- be the same every rebuild.
+	local STEPS = { { "xs", XS }, { "sm", SM }, { "md", MD }, { "lg", LG }, { "xl", XL } }
+	local EDGES = { { "l", "PaddingLeft" }, { "r", "PaddingRight" }, { "t", "PaddingTop" }, { "b", "PaddingBottom" } }
+	for _, stepEntry in STEPS do
+		local step, size = stepEntry[1], stepEntry[2]
+		local v = UDim.new(0, size)
+		local all = { PaddingTop = v, PaddingBottom = v, PaddingLeft = v, PaddingRight = v }
+		-- Pseudo form (on the tagged GuiObject) and direct form (on an explicit UIPadding).
+		StyleRule(`.p-{step}::UIPadding`, all)
+		StyleRule(`UIPadding.p-{step}`, all)
+		-- Per-edge (priority 1 overrides general p-*)
+		for _, edgeEntry in EDGES do
+			local edge, prop = edgeEntry[1], edgeEntry[2]
+			StyleRule(`.p{edge}-{step}::UIPadding`, { [prop] = v }, nil, 1)
+			StyleRule(`UIPadding.p{edge}-{step}`, { [prop] = v }, nil, 1)
+		end
+	end
 
 	-- Corner radii. UICorner defaults every corner to CornerRadius (0, 8), so a
 	-- per-corner preset must set ALL FOUR corners (named = radius, rest = ZERO) —
@@ -165,7 +113,8 @@ return function()
 
 	StyleRule(".corner-sm::UICorner", { CornerRadius = R_SM })
 	StyleRule(".corner-md::UICorner", { CornerRadius = R_MD })
-	StyleRule(".corner-lg::UICorner", { CornerRadius = R_XL })
+	StyleRule(".corner-lg::UICorner", { CornerRadius = R_LG })
+	StyleRule(".corner-xl::UICorner", { CornerRadius = R_XL })
 	StyleRule(".corner-full::UICorner", { CornerRadius = R_FULL })
 
 	-- Per-edge (t/b/l/r) and per-corner (tl/tr/bl/br) radii at each size; every
