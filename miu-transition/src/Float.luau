@@ -133,11 +133,16 @@ local function Float(props, renderChildren)
 		-- route through px() and scaling is a scope factor, the factor is known without
 		-- measurement — Float would take it as a prop and the ruler becomes redundant
 		-- (or a cross-check assertion).
+		-- The ruler sits left of the origin: AutomaticSize ancestors measure the deep
+		-- descendant bounding box but ignore extent left of/above the origin, so at (0, 0)
+		-- its 100px width padded any narrower auto-sized list row (without a UIListLayout
+		-- between) to 100px, with the content stuck on the left.
 		local derivedScale = 1
 		if automaticSize or props.renderFloatingChildren then
 			local ruler = Element("Frame", {
 				id = "UIScaleDeriver",
 				BackgroundTransparency = 1,
+				Position = UDim2.fromOffset(-100, 0),
 				Size = UDim2.fromOffset(100, 0),
 				ZIndex = -1,
 			})
