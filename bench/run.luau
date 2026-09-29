@@ -7,7 +7,8 @@
 	samples where the GC ran are dropped), and a check that the ScreenGui's instance count at the
 	end still equals the count after the warmup (and `expectedInstances` when the fixture states
 	it), so a broken optimization fails instead of looking fast. The count is taken after the
-	warmup because Transitions only show their content once real time has passed.
+	warmup because Transitions only show their content once real time has passed; a fixture's
+	`warmupSeconds` extends the warmup until they've settled.
 
 	Run through `mise run bench` (see bench/README.md). Args: [--baseline <results.json>]
 ]]
@@ -27,6 +28,7 @@ local FIXTURES = {
 	require("./fixtures/changing"),
 	require("./fixtures/churn"),
 	require("./fixtures/transitions"),
+	require("./fixtures/transitionsSettled"),
 }
 
 local WARMUP = 50
@@ -89,6 +91,14 @@ for _, fixture in FIXTURES do
 
 	for _ = 1, WARMUP do
 		step()
+	end
+	-- Fixtures that ease by real time (Transitions) keep walking, a frame at a time, until settled
+	if fixture.warmupSeconds then
+		local t0 = os.clock()
+		while os.clock() - t0 < fixture.warmupSeconds do
+			step()
+			task.wait()
+		end
 	end
 	local mounted = #gui:GetDescendants()
 	local nodes = countNodes(root)
