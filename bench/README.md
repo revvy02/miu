@@ -24,10 +24,13 @@ optimization that breaks rendering fails instead of looking fast.
 | `stylesheet` | 8 × `StyleLink(StyleSheet(WindRules))` | re-walking static style sheets |
 | `changing` | 500 TextLabels with new `Text` every walk | the write path |
 | `churn` | keyed list of 200, 20 swapped per walk | mounting and unmounting |
-| `transitions` | 50 settled + 50 flipping Transitions | Float and Transition |
+| `transitions` | 50 settled + 50 flipping Transitions in one list | Float and Transition while animating |
+| `transitions-settled` | 100 settled Transitions in one list | the same list with nothing changing size |
 
 Add a fixture by writing a module in `fixtures/` that returns
-`{ name, summary, render(walk), expectedInstances? }` and listing it in `run.luau`.
+`{ name, summary, render(walk), expectedInstances?, warmupSeconds? }` and listing it in
+`run.luau`. `warmupSeconds` keeps walking once per frame before timing starts, for fixtures that
+ease by real time.
 
 **Results.** Commit a results file with each change it measures, named for that change, so the
 commit carries its before and after. `latest.json` is scratch. Compare only runs made on the same
