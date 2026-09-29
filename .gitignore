@@ -3,3 +3,5 @@ luau_packages/
 lune_packages/
 .DS_Store
 .rwork/
+.rodeo/
+bench/results/latest.json

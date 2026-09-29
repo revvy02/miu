@@ -10,7 +10,7 @@ stylua = "latest"
 "ubi:pesde-pkg/pesde" = "latest"
 "ubi:UpliftGames/wally" = "v0.3.2"
 "ubi:revvy02/darklua" = "v0.19.1"
-"ubi:revvy02/rodeo" = "v1.2.2-rc.2"
+"ubi:rodeo-rbx/rodeo" = "v1.5.0-rc.11"
 "ubi:revvy02/rwork" = "v0.12.0"
 
 [tasks.install]
@@ -20,3 +20,16 @@ run = "pesde install"
 [tasks.dev]
 description = "Build + open the dev place, then live-sync (rwork)"
 run = "rwork dev"
+
+[tasks.bench]
+description = "Benchmark the bench/ fixtures in a fresh Studio (bench/README.md)"
+usage = '''
+arg "[label]" default="latest" help="results file: bench/results/<label>.json"
+flag "--baseline <file>" help="saved results to compare against"
+'''
+run = '''
+set -e
+mkdir -p .rodeo/.temp bench/results
+rojo build dev.project.json -o .rodeo/.temp/bench.rbxl
+rodeo run bench/run.luau --place .rodeo/.temp/bench.rbxl --return "bench/results/${usage_label}.json" -- ${usage_baseline:+--baseline "$usage_baseline"}
+'''
