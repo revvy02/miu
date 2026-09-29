@@ -12,7 +12,7 @@
 				"miu_ui_labs": { "$path": "miu-ui-labs/src" },
 				"miu-virtual-list": { "$path": "miu-virtual-list/src" },
 				"miu_wind": { "$path": "miu-wind/src" },
-				"retained_scope": { "$path": "roblox_packages/.pesde/revvy02_retained-scope@0.1.0/retained-scope/src" },
+				"retained_scope": { "$path": "roblox_packages/.pesde/revvy02_retained-scope@0.1.1/retained-scope/src" },
 				"ui_labs": { "$path": "roblox_packages/.pesde/pepeeltoro41_ui-labs@2.4.2/ui-labs/src" }
 			}
 		}

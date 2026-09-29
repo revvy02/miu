@@ -11,6 +11,7 @@ local Miu = setmetatable({
 	push = scope.push,
 	pop = scope.pop,
 	peek = scope.peek,
+	defer = scope.defer,
 	root = scope.root,
 	Context = Context,
 	DeltaTime = DeltaTime,
