@@ -13,8 +13,8 @@ mise run bench my-change --baseline bench/results/baseline.json
 
 The table shows the median µs per walk and per miu node, and roughly how many KB each walk
 allocates. With `--baseline` it adds the change against those saved results. A run fails if a
-fixture's instance count drifts across walks or doesn't match the count it states, so an
-optimization that breaks rendering fails instead of looking fast.
+fixture's instance count drifts across walks, doesn't match the count it states, or its check
+fails, so an optimization that breaks rendering fails instead of looking fast.
 
 | Fixture | Tree | What it isolates |
 |---|---|---|
@@ -26,11 +26,13 @@ optimization that breaks rendering fails instead of looking fast.
 | `churn` | keyed list of 200, 20 swapped per walk | mounting and unmounting |
 | `transitions` | 50 settled + 50 flipping Transitions in one list | Float and Transition while animating |
 | `transitions-settled` | 100 settled Transitions in one list | the same list with nothing changing size |
+| `nestedFloats` | auto Float around 20 resizing auto Floats | nested measurement; its check fails if the outer Float trails the inner ones |
 
 Add a fixture by writing a module in `fixtures/` that returns
-`{ name, summary, render(walk), expectedInstances?, warmupSeconds? }` and listing it in
+`{ name, summary, render(walk), expectedInstances?, warmupSeconds?, check? }` and listing it in
 `run.luau`. `warmupSeconds` keeps walking once per frame before timing starts, for fixtures that
-ease by real time.
+ease by real time. `check(gui)` runs after each sample, outside the timing, and fails the run with
+the message it returns.
 
 **Results.** Commit a results file with each change it measures, named for that change, so the
 commit carries its before and after. `latest.json` is scratch. Compare only runs made on the same

@@ -8,7 +8,8 @@
 	end still equals the count after the warmup (and `expectedInstances` when the fixture states
 	it), so a broken optimization fails instead of looking fast. The count is taken after the
 	warmup because Transitions only show their content once real time has passed; a fixture's
-	`warmupSeconds` extends the warmup until they've settled.
+	`warmupSeconds` extends the warmup until they've settled. A fixture's `check(gui)` runs after
+	each sample, outside the timing, and fails the run with the message it returns.
 
 	Run through `mise run bench` (see bench/README.md). Args: [--baseline <results.json>]
 ]]
@@ -29,6 +30,7 @@ local FIXTURES = {
 	require("./fixtures/churn"),
 	require("./fixtures/transitions"),
 	require("./fixtures/transitionsSettled"),
+	require("./fixtures/nestedFloats"),
 }
 
 local WARMUP = 50
@@ -104,6 +106,7 @@ for _, fixture in FIXTURES do
 	local nodes = countNodes(root)
 
 	local us, kb = {}, {}
+	local checkFailed = false
 	for _ = 1, SAMPLES do
 		local kb0 = gcinfo()
 		local t0 = os.clock()
@@ -115,6 +118,11 @@ for _, fixture in FIXTURES do
 		table.insert(us, seconds / WALKS * 1e6)
 		if grown >= 0 then
 			table.insert(kb, grown / WALKS)
+		end
+		local problem = fixture.check and fixture.check(gui)
+		if problem and not checkFailed then
+			checkFailed = true
+			table.insert(failures, `{fixture.name}: {problem}`)
 		end
 		task.wait() -- stay under the script timeout; lets the engine run between samples
 	end
@@ -179,6 +187,6 @@ end
 print(table.concat(lines, "\n"))
 
 if #failures > 0 then
-	error("instance checks failed:\n  " .. table.concat(failures, "\n  "))
+	error("checks failed:\n  " .. table.concat(failures, "\n  "))
 end
 return results
