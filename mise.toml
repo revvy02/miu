@@ -33,3 +33,19 @@ mkdir -p .rodeo/.temp bench/results
 rojo build dev.project.json -o .rodeo/.temp/bench.rbxl
 rodeo run bench/run.luau --place .rodeo/.temp/bench.rbxl --return "bench/results/${usage_label}.json" -- ${usage_baseline:+--baseline "$usage_baseline"}
 '''
+
+[tasks.bench-ab]
+description = "A/B the working tree against a git ref, interleaved in one Studio session (bench/README.md)"
+usage = '''
+arg "[ref]" default="HEAD" help="baseline commit"
+flag "--label <label>" default="ab-latest" help="results file: bench/results/<label>.json"
+flag "--baseline-retained-scope <dir>" help="retained-scope src for the baseline (default: a copy of the candidate's)"
+'''
+run = '''
+set -e
+rm -rf .rodeo/.temp/ab-baseline
+mkdir -p .rodeo/.temp/ab-baseline bench/results
+git archive "${usage_ref}" -- miu/src miu-wind/src miu-transition/src miu-px/src | tar -x -C .rodeo/.temp/ab-baseline
+rojo build dev.project.json -o .rodeo/.temp/bench.rbxl
+rodeo run bench/run.luau --place .rodeo/.temp/bench.rbxl --return "bench/results/${usage_label}.json" -- --ab .rodeo/.temp/ab-baseline --ab-ref "$(git rev-parse --short "${usage_ref}")" ${usage_baseline_retained_scope:+--ab-retained-scope "$usage_baseline_retained_scope"}
+'''

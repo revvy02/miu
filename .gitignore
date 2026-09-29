@@ -5,3 +5,4 @@ lune_packages/
 .rwork/
 .rodeo/
 bench/results/latest.json
+bench/results/ab-latest.json
