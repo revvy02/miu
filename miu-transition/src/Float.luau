@@ -1,5 +1,6 @@
 local Element = require("../miu").Element
 local Portal = require("../miu").Portal
+local defer = require("../miu").defer
 
 local PIXEL_BIAS = 0.975 -- helps with the 1 pixel stuttering when animations converge, as UDim2 offset rounds to nearest pixel
 
@@ -15,6 +16,13 @@ local PIXEL_BIAS = 0.975 -- helps with the 1 pixel stuttering when animations co
 	Measuring after the children exist is the whole point — reading AbsoluteSize flushes layout
 	synchronously, so the container gets *this* frame's true content size (no one-frame lag that
 	the old push/pop form had from measuring before the children rendered).
+
+	The container's Size is written when the enclosing scope closes (miu's `defer`), not right
+	after measuring. Written immediately, each resizing sibling dirties their shared parent and the
+	next sibling's measurement forces a layout of that whole parent: N resizing siblings cost N
+	layouts. Deferred, the siblings all measure a clean tree and their writes cost one layout
+	together. An ancestor Float still measures this walk's sizes: its content scope closes, which
+	applies its descendants' writes, before it measures.
 
 	Usage:
 		Float({
@@ -95,7 +103,8 @@ local function Float(props, renderChildren)
 	local widthTransform = props.widthTransform or 1
 	local heightTransform = props.heightTransform or 1
 
-	return Element("Frame", {
+	local transformedSize
+	local node = Element("Frame", {
 		id = props.id,
 		BackgroundTransparency = props.backgroundTransparency or 1,
 		BackgroundColor3 = props.backgroundColor3,
@@ -191,8 +200,14 @@ local function Float(props, renderChildren)
 			}, props.renderFloatingChildren)
 		end
 
-		container.instance.Size = applyTransform(containerSize, widthTransform, heightTransform)
-	end) :: any
+		transformedSize = applyTransform(containerSize, widthTransform, heightTransform)
+	end)
+
+	-- Deferred to the scope Float was called in, so it lands with its siblings' (see the header)
+	defer(function()
+		node.instance.Size = transformedSize
+	end)
+	return node :: any
 end
 
 return Float

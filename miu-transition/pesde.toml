@@ -1,5 +1,5 @@
 name = "rvy/miu_transition"
-version = "0.1.5"
+version = "0.1.6"
 license = "MIT"
 private = true
 
@@ -17,7 +17,7 @@ default = "https://github.com/pesde-pkg/index"
 default = "https://github.com/UpliftGames/wally-index"
 
 [dependencies]
-miu = { wally = "revvy02/miu", version = "^0.4.0" }
+miu = { wally = "revvy02/miu", version = "^0.4.1" }
 miu_ui_labs = { wally = "revvy02/miu-ui-labs", version = "^0.5.0" }
 miu_px = { wally = "revvy02/miu-px", version = "^0.2.0" }
 ui_labs = { wally = "pepeeltoro41/ui-labs", version = "^2.3.8" }

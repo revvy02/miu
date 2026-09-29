@@ -16,5 +16,5 @@ default = "https://github.com/UpliftGames/wally-index"
 # directly out of roblox_packages/.pesde/ (bypassing pesde's linkers), so
 # versions are pinned exactly — a bump must update the $path there too.
 [dependencies]
-retained_scope = { wally = "revvy02/retained-scope", version = "=0.1.0" }
+retained_scope = { wally = "revvy02/retained-scope", version = "=0.1.1" }
 ui_labs = { wally = "pepeeltoro41/ui-labs", version = "=2.4.2" }
