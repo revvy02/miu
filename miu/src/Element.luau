@@ -64,6 +64,11 @@ end
 
 local MIU_PUSH = miu.push
 
+-- Set _G._MIU_PROFILER_LABELS = true before miu is first required to wrap each element's prop
+-- update in microprofiler labels (update, hydrate_*). Off by default: they cost a few percent of
+-- every walk. Read once here, so setting it later has no effect.
+local PROFILER_LABELS = _G._MIU_PROFILER_LABELS == true
+
 local function on_remove(_parent, _id, child)
 	unmounting(child)
 end
@@ -74,7 +79,9 @@ local function reactor_pop()
 end
 
 local function attributes(instance, new, old)
-	debug.profilebegin("hydrate_attributes")
+	if PROFILER_LABELS then
+		debug.profilebegin("hydrate_attributes")
+	end
 	if old then
 		for attr, val in new do
 			if old[attr] ~= val then
@@ -92,11 +99,35 @@ local function attributes(instance, new, old)
 			instance:SetAttribute(attr, val)
 		end
 	end
-	debug.profileend()
+	if PROFILER_LABELS then
+		debug.profileend()
+	end
+end
+
+-- Tags usually come from an inline table literal, so they arrive as a fresh table every walk
+-- holding the same entries. Compared index by index both ways, not by length: a literal with a
+-- conditional entry can have nil holes, which make # unreliable.
+local function sameTags(a, b)
+	for i, tag in a do
+		if b[i] ~= tag then
+			return false
+		end
+	end
+	for i, tag in b do
+		if a[i] ~= tag then
+			return false
+		end
+	end
+	return true
 end
 
 local function tags(instance, new, old)
-	debug.profilebegin("hydrate_tags")
+	if old and sameTags(new, old) then
+		return
+	end
+	if PROFILER_LABELS then
+		debug.profilebegin("hydrate_tags")
+	end
 	if old then
 		for _, tag in new do
 			if not table.find(old, tag) then
@@ -113,7 +144,9 @@ local function tags(instance, new, old)
 			instance:AddTag(tag)
 		end
 	end
-	debug.profileend()
+	if PROFILER_LABELS then
+		debug.profileend()
+	end
 end
 
 -- Handlers are inline closures, so their identity changes every frame. Diffing them would
@@ -121,7 +154,9 @@ end
 -- to the current handler, and per frame just swap the stored handler ref (a field write). The
 -- connection is created when an event name first appears and torn down only when it's dropped.
 local function events(node, instance, new, old)
-	debug.profilebegin("hydrate_events")
+	if PROFILER_LABELS then
+		debug.profilebegin("hydrate_events")
+	end
 	local handlers = node.events
 	local connections = node.connections
 
@@ -147,11 +182,15 @@ local function events(node, instance, new, old)
 			end
 		end
 	end
-	debug.profileend()
+	if PROFILER_LABELS then
+		debug.profileend()
+	end
 end
 
 local function update(node, newProps)
-	debug.profilebegin("update")
+	if PROFILER_LABELS then
+		debug.profilebegin("update")
+	end
 	local instance = node.instance
 	local oldProps = node.props
 
@@ -168,7 +207,9 @@ local function update(node, newProps)
 			instance[k] = v
 		end
 	end
-	debug.profileend()
+	if PROFILER_LABELS then
+		debug.profileend()
+	end
 end
 
 local function push<C, T>(class: C & (string | ""), propsIn: MiuProps<C>?): MiuNode<T>
@@ -184,14 +225,19 @@ local function push<C, T>(class: C & (string | ""), propsIn: MiuProps<C>?): MiuN
 			node.instance.Name = tostring(node.id)
 		end
 		node.instance.Parent = node.parent.instance
+		node.parentInstance = node.parent.instance
 
 		node.events = {}
 		node.connections = {}
 
 		node.props = {}
 		node.mounted = true
-	elseif node.instance.Parent ~= node.parent.instance then
+	elseif node.parentInstance ~= node.parent.instance then
+		-- Compared against the parent miu assigned last, not Instance.Parent: reading a property
+		-- is an engine call, per element per walk. Only miu parents these instances, so the two
+		-- agree; one reparented from outside miu is no longer moved back.
 		node.instance.Parent = node.parent.instance
+		node.parentInstance = node.parent.instance
 	end
 
 	update(node, props)
