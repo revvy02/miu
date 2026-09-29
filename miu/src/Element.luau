@@ -194,17 +194,21 @@ local function update(node, newProps)
 	local instance = node.instance
 	local oldProps = node.props
 
+	-- Value first: most props are unchanged most walks, and an unchanged one then costs one lookup
+	-- instead of a check against every special key. The special keys still reach their handlers
+	-- whenever their table changes, which inline literals do every walk.
 	for k, v in newProps do
-		if k == "id" then
-			continue
-		elseif k == "attributes" then
-			attributes(instance, v, oldProps.attributes)
-		elseif k == "tags" then
-			tags(instance, v, oldProps.tags)
-		elseif k == "events" then
-			events(node, instance, v, oldProps.events)
-		elseif oldProps[k] ~= v then
-			instance[k] = v
+		local old = oldProps[k]
+		if old ~= v then
+			if k == "tags" then
+				tags(instance, v, old)
+			elseif k == "events" then
+				events(node, instance, v, old)
+			elseif k == "attributes" then
+				attributes(instance, v, old)
+			elseif k ~= "id" then
+				instance[k] = v
+			end
 		end
 	end
 	if PROFILER_LABELS then
@@ -250,20 +254,19 @@ local function pop()
 	reactor_pop()
 end
 
-local function scope<C, T>(class: C & (string | ""), props: MiuProps<C>?, fn: ((MiuNode<T>) -> ())?): MiuNode<T>
-	local node = push(class, props)
-	if fn then
-		fn(node)
-	end
-	reactor_pop()
-	return node :: any
-end
-
 return setmetatable({
 	push = push,
 	pop = pop,
 }, {
+	-- The bracket form does the push/prune/pop itself, pruning the node it already holds rather
+	-- than looking it up again: a couple of calls fewer per element per walk.
 	__call = function<C, T>(_, class: C & (string | ""), props: MiuProps<C>?, fn: ((MiuNode<T>) -> ())?): MiuNode<T>
-		return scope(class, props, fn)
+		local node = push(class, props)
+		if fn then
+			fn(node)
+		end
+		miu.prune(node, on_remove)
+		miu.pop()
+		return node :: any
 	end,
 })
