@@ -17,19 +17,40 @@ local Element = Miu.Element
 
 local Dimensions = require("./Dimensions")
 
+-- The extent of a range along the scroll axis: from the head's start to the tail's end.
+local function getRangeOffsets(dimensions, data, head, tail, windowSize, direction): (number, number)
+	local headRect = Dimensions.getUDimRect(dimensions, data[head], head, windowSize, direction)
+	local tailRect = Dimensions.getUDimRect(dimensions, data[tail], tail, windowSize, direction)
+
+	if direction == "x" then
+		return headRect.position.X.Offset, tailRect.position.X.Offset + tailRect.size.X.Offset
+	else
+		return headRect.position.Y.Offset, tailRect.position.Y.Offset + tailRect.size.Y.Offset
+	end
+end
+
 -- Offset boundary cache check (port of controller:133-147).
 -- Returns cached range if scroll is within boundaries, otherwise nil.
-local function getCachedRange(state, scrollAxis, windowAxis, windowSize, dataLength)
+local function getCachedRange(state, scrollAxis, windowAxis, windowSize, dataLength, dimensions, data, direction)
 	if
-		state.headOffset ~= nil
-		and state.headOffset <= scrollAxis
-		and state.tailOffset >= windowAxis + scrollAxis
-		and state.prevWindowSize == windowSize
-		and state.prevDataLen == dataLength
+		state.headOffset == nil
+		or state.headOffset > scrollAxis
+		or state.tailOffset < windowAxis + scrollAxis
+		or state.prevWindowSize ~= windowSize
+		or state.prevDataLen ~= dataLength
 	then
-		return state.cachedHead, state.cachedTail
+		return nil, nil
 	end
-	return nil, nil
+
+	-- The offsets were computed with the dimensions of the frame that cached them. Dimensions
+	-- can change since: a caller passes a new size, or cachedFirstAbsoluteSize measures one in
+	-- place. The range only holds while its head and tail still span the same offsets.
+	local headOffset, tailOffset = getRangeOffsets(dimensions, data, state.cachedHead, state.cachedTail, windowSize, direction)
+	if headOffset ~= state.headOffset or tailOffset ~= state.tailOffset then
+		return nil, nil
+	end
+
+	return state.cachedHead, state.cachedTail
 end
 
 -- Update offset boundary cache after computing a new range (port of controller:185-203).
@@ -44,17 +65,7 @@ local function updateCache(state, head, tail, dimensions, data, windowSize, dire
 		return
 	end
 
-	local headRect = Dimensions.getUDimRect(dimensions, data[head], head, windowSize, direction)
-	local tailRect = Dimensions.getUDimRect(dimensions, data[tail], tail, windowSize, direction)
-
-	if direction == "x" then
-		state.headOffset = headRect.position.X.Offset
-		state.tailOffset = tailRect.position.X.Offset + tailRect.size.X.Offset
-	else
-		state.headOffset = headRect.position.Y.Offset
-		state.tailOffset = tailRect.position.Y.Offset + tailRect.size.Y.Offset
-	end
-
+	state.headOffset, state.tailOffset = getRangeOffsets(dimensions, data, head, tail, windowSize, direction)
 	state.cachedHead = head
 	state.cachedTail = tail
 	state.prevWindowSize = windowSize
@@ -122,7 +133,7 @@ local function push(props, render)
 
 	-- Compute visible range with offset boundary caching
 	local state = Miu.peek()
-	local head, tail = getCachedRange(state, scrollAxis, windowAxis, windowSize, #data)
+	local head, tail = getCachedRange(state, scrollAxis, windowAxis, windowSize, #data, dimensions, data, direction)
 
 	if head == nil then
 		head, tail = Dimensions.getVisibleRange(dimensions, data, scrollAxis, windowAxis, windowSize, direction)
