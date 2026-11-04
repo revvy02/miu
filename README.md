@@ -102,6 +102,71 @@ RunService.Heartbeat:Connect(function()
 end)
 ```
 
+## API
+
+### `Miu(id?, fn?)`
+
+Enters the child node `id` of the current node, creating it on first visit, then runs `fn(node)` inside it and returns the node. Anything you store on a node lasts across calls:
+
+```lua
+local state = Miu("counter")
+state.count = (state.count or 0) + 1
+```
+
+Leave out `id` and the node takes the next position in the current scope. Give an explicit id to any node that's conditional or inside a loop, or state can move between nodes when a branch flips.
+
+`Miu.push(id?)` / `Miu.pop()` are the bracket form, and `Miu.peek()` returns the current node. Plain nodes never remove unvisited children; only `Element` and `Portal` do.
+
+`Miu.defer(fn)` runs `fn` when the current scope pops, after all its siblings have rendered. Use it for instance writes that depend on a measured size.
+
+### `Element(className, props?, fn?)`
+
+Creates a `className` Instance on first visit, parents it to the nearest enclosing Element or Portal, and applies `props`. Props are the Instance's own properties, plus:
+
+- `id`: the node's id (a string or number)
+- `tags`: CollectionService tags
+- `attributes`: a table of attributes
+- `events`: `{ [signalName] = handler }`. Handlers can be inline closures.
+
+A prop is only applied when its value changes, and a prop you stop passing keeps its last value.
+
+`fn(node)` renders children, and `node.instance` is the Instance. When the call returns, any direct child that wasn't visited during it is removed. `Element.push` / `Element.pop` are the bracket form.
+
+### `Portal(target, id, fn?)`
+
+Renders `fn`'s elements into an existing Instance, such as `PlayerGui`. Like `Element`, it removes children it didn't visit when it returns, and it never changes `target` itself. A Portal you stop calling stays mounted, so to remove its contents, put the condition inside it:
+
+```lua
+Portal(playerGui, "hud", function()
+	if showHud then
+		Element("ScreenGui", { ResetOnSpawn = false })
+	end
+end)
+```
+
+### `Context(default)`
+
+Passes a value down the tree without threading it through props. `Ctx(value, fn)` provides `value` to everything called inside `fn`, and `Ctx()` reads the nearest value provided, or `default`:
+
+```lua
+local Theme = Miu.Context({ text = Color3.new(1, 1, 1) })
+
+Theme({ text = Color3.new(1, 0.4, 0.4) }, function()
+	Element("TextLabel", { Text = "warning", TextColor3 = Theme().text })
+end)
+```
+
+### `DeltaTime(id?)`
+
+Returns the seconds since this call site last ran, or 0 on its first run. Each call site is timed on its own, so a subtree you render less often still gets the real elapsed time:
+
+```lua
+local spin = Miu("spin")
+spin.angle = (spin.angle or 0) + 90 * DeltaTime()
+```
+
+Give it an `id` when the call is conditional.
+
 ## Examples of what's possible
 
 Phone UI
