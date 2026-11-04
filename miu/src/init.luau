@@ -2,6 +2,7 @@ local Context = require("@self/Context")
 local DeltaTime = require("@self/DeltaTime")
 local Element = require("@self/Element")
 local Portal = require("@self/Portal")
+local Smooth = require("@self/Smooth")
 local scope = require("@self/scope")
 
 export type MiuNode<T = {}> = scope.MiuNode<T>
@@ -17,6 +18,7 @@ local Miu = setmetatable({
 	DeltaTime = DeltaTime,
 	Element = Element,
 	Portal = Portal,
+	Smooth = Smooth,
 }, {
 	__call = function(_, id, fn)
 		return scope(id, fn)
