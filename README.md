@@ -167,6 +167,18 @@ spin.angle = (spin.angle or 0) + 90 * DeltaTime()
 
 Give it an `id` when the call is conditional.
 
+### `Smooth(goal, rate?, id?)`
+
+Eases toward `goal` and returns the current value, at the same speed whatever the framerate. It works with numbers and anything with a `:Lerp` method, such as `Color3`, `UDim2`, `Vector3` and `CFrame`. `rate` defaults to 12, and higher is snappier:
+
+```lua
+Element("Frame", {
+	Size = UDim2.fromScale(Smooth(if open then 1 else 0, 16, "width"), 1),
+})
+```
+
+Give it an `id` when the call is conditional, inside a loop, or one of several `Smooth` calls in the same props table.
+
 ## Examples of what's possible
 
 Phone UI
