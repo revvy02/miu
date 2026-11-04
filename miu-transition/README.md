@@ -1,28 +1,6 @@
 # miu-transition
 
-## Smooth
-
-Framerate-independent easing toward a goal, one call per frame:
-
-```lua
-local Smooth = require("@pkg/miu_transition").Smooth
-
--- somewhere inside a miu scope, every frame:
-Element("Frame", {
-	Size = Smooth(if hovering then UDim2.fromScale(1.1, 1.1) else UDim2.fromScale(1, 1), 8, "size"),
-	BackgroundColor3 = Smooth(if selected then SELECTED_COLOR else IDLE_COLOR, 12, "color"),
-})
-```
-
-```lua
-Smooth(goal, rate?, id?) -> value
-```
-
-- `goal` — where to ease to. Works with numbers and any `:Lerp`-able type (Color3, UDim2, Vector2/3, CFrame, …); every type animates identically.
-- `rate` — how fast to ease, default `12`. Higher is snappier. Framerate-independent, critically damped feel — no overshoot.
-- `id` — optional. Without one the state is keyed by call order in the enclosing scope. Pass an id whenever that order isn't fixed: a conditional call, a call in a loop, or sibling `Smooth` calls inside one props table — reordering two of them would silently swap their state.
-
-The value starts at the first goal it sees — nothing pops in from zero.
+`Smooth` lives in miu now: `require("@pkg/miu").Smooth`.
 
 ## Transition
 
