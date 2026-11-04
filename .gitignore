@@ -6,3 +6,4 @@ lune_packages/
 .rodeo/
 bench/results/latest.json
 bench/results/ab-latest.json
+.env
