@@ -1,20 +1,21 @@
 # miu
+`miu` is a retained state library. The primary use case is for elegant immediate mode ui. You can write ui code declaratively by interleaving it directly in your ecs code. Immediate mode ui has overhead, but the overhead is explicit and easily visible.
 
-miu is a retained state library. Primary use case is for elegant immediate mode ui. You can write ui code declaratively by interleaving it directly in your ecs code. Immediate mode ui has overhead, but the overhead is explicit and easily visible, and miu is also faster than things like iris that depend on `debug.info`.
+## Basics
 
-Miu node example (it's useful to need retained state that isn't necessarily an element)
+Node example (it's useful to have retained state that isn't necessarily an element, like for ui specific state)
 ```lua
 RunService.Heartbeat:Connect(function()
 	local node1 = Miu.push("outer_id")
-	 -- node2 should be the same reference across multiple frames
+	-- node2 should be the same reference across multiple frames
 	local node2 = Miu.push("inner_id")
-	
+
 	Miu.pop()
 	Miu.pop()
 end)
 ```
 
-`Element` is the analog to React.createElement:
+Element push/pop example
 ```lua
 Element.push("Frame", {
 	id = "element_id",
@@ -30,14 +31,14 @@ Element.push("TextLabel", {
 	-- to an index of 1 (and will also name the TextLabel instance 1, based on the automatic cursor id)
 	Text = "hi",
 	Size = UDim2.fromScale(1, 1),
-	TextSize = 30 -- lowkey forgot if this is even the right property
+	TextSize = 30
 })
 
-Element.pop() 
-Element.pop() -- every element pop call scans the current retained tree, any unvisited element is pruned and cleaned up.
+Element.pop()
+Element.pop() -- every element pop prunes that element's direct children that weren't visited this walk, unmounting their subtrees.
 ```
 
-further examples are going to just use the scope api directly, every push/pop can be represented as just a function call with the push/pop at the call stack boundaries. below is an example equivalent to the one above with the scope/function syntax:
+Further examples are going to just use the scope api directly, every push/pop can be represented as just a function call with the push/pop at the call stack boundaries. Below is an example equivalent to the one above with the scope/function syntax:
 ```lua
 Element("Frame", {
 	id = "element_id",
@@ -53,51 +54,50 @@ Element("Frame", {
 end)
 ```
 
-ugly native leaderboard ui example
+Below is a full ui example using `Portal` to render ui in `PlayerGui`
 ```lua
--- once again explicit ids are good to avoid the footgun but im lazy and like
--- minimal code, even if it means i may have to think more later. if you have subtrees that render conditionally then explicit ids avoid problems like nodes going to the wrong callers
+local Miu = require("@pkg/miu")
+local Element = Miu.Element
+local Portal = Miu.Portal
 
--- portal component will render its inner element tree in the portal location,
--- this is the analog to React.createPortal
-Portal("leaderboard", localPlayer.PlayerGui, function()
-	Element("ScreenGui", {
-		ResetOnSpawn = false,
-		IgnoreGuiInset = false,
-		ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-	}, function()
-		Element("Frame", {
-			AutomaticSize = Enum.AutomaticSize.XY,
-			BackgroundTransparency = 1,
-			Size = UDim2.fromScale(0, 0),
+local MiuTransition = require("@pkg/miu-transition")
+local Activated = MiuTransition.Activated
+
+local RunService = game:GetService("RunService")
+local PlayerGui = game:GetService("Players").LocalPlayer.PlayerGui
+
+RunService.Heartbeat:Connect(function()
+	Portal(PlayerGui, "gui", function()
+		Element("ScreenGui", {
+			ResetOnSpawn = false,
+			IgnoreGuiInset = false,
+			DisplayOrder = 10,
+			ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
 		}, function()
-			Element("UIListLayout", {
-				-- props for vertical layout
-			})
-			for e, player, score in world:query(cts.Player, cts.Score) do
-				Element("Frame", {
-					AutomaticSize = Enum.AutomaticSize.XY,
-					BackgroundTransparency = 1,
-					Size = UDim2.fromScale(0, 0),
-				}, function()
-					Element("UIListLayout", {
-						-- props for horizontal layout
-					})
-					Element("TextLabel", {
-						Text = player.Name,
-						TextSize = 20,
-						AutomaticSize = Enum.AutomaticSize.XY
-					})
-					Element("TextLabel", {
-						Text = tostring(score),
-						TextSize = 20,
-						AutomaticSize = Enum.AutomaticSize.XY
-					})
-				end)
+			local state = Miu("inner_state")
+
+			if not state.score then
+				state.score = 0
 			end
+
+			Element("TextButton", {
+				Text = `score: {state.score}`,
+				Size = UDim2.fromScale(1, 1),
+				TextSize = 30
+			}, function(node)
+				-- if node.instance.GuiState == Enum.GuiState.Press then
+					-- state.score += 1
+				-- end
+
+				-- You can read GuiState directly, but it stays Press every frame the button is
+				-- held, so the check above counts one click many times. miu-transition's
+				-- Activated helper only returns true on the first frame of each press.
+
+				if Activated() then
+					state.score += 1
+				end
+			end)
 		end)
 	end)
 end)
 ```
-
--- examples of more complicated ui coming soon
