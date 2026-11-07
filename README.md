@@ -1,6 +1,15 @@
 # miu
 `miu` is a retained state library. The primary use case is for elegant immediate mode ui. You can write ui code declaratively by interleaving it directly in your ecs code. Immediate mode ui has overhead, but the overhead is explicit and easily visible.
 
+## Installation
+
+Install it with [Wally](https://wally.run/package/revvy02/miu?version=0.4.3) by adding it to your `wally.toml`:
+
+```toml
+[dependencies]
+miu = "revvy02/miu@0.4.3"
+```
+
 ## Basics
 
 Node example (it's useful to have retained state that isn't necessarily an element, like for ui specific state)
