@@ -126,7 +126,7 @@ Leave out `id` and the node takes the next position in the current scope. Give a
 
 `Miu.push(id?)` / `Miu.pop()` are the bracket form, and `Miu.peek()` returns the current node. Plain nodes never remove unvisited children; only `Element` and `Portal` do.
 
-`Miu.defer(fn)` runs `fn` when the current scope pops, after all its siblings have rendered. Use it for instance writes that depend on a measured size.
+`Miu.defer(fn)` runs `fn` when the current scope pops, after all its siblings have rendered.
 
 ### `Element(className, props?, fn?)`
 
