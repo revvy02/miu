@@ -1,9 +1,11 @@
 local Miu = require("../miu")
 
-local function RemovingDictionary(dict, lifetime)
+-- Its state is a miu node in the scope it's called from: the next in call order, or the one named
+-- `id` (pass one for a dictionary that's called conditionally or in a loop).
+local function RemovingDictionary(dict, lifetime, id)
 	lifetime = lifetime or 1
 
-	local state = Miu("RemovingDictionary")
+	local state = Miu(id)
 	local merged, removing = state.merged, state.removing
 
 	if not merged then

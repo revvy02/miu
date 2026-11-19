@@ -12,6 +12,11 @@ local Transition = require("./Transition")
 	each in a Transition. Supports opt-in trail/stagger animation.
 
 	Props:
+		id: any?                           -- names the list's node, which holds its list and
+		                                   -- its trail; without one it's the next node in the
+		                                   -- scope's call order, so pass one for a list that's
+		                                   -- called conditionally or in a loop. Rows are keyed
+		                                   -- beside it, so it mustn't be one of their keys.
 		items: { { id: string, ... } }    -- array of records
 		keyer: ((item) -> string)?         -- custom key extractor (default: item.id)
 		show: boolean?                     -- list-level visibility; items stay mounted
@@ -45,6 +50,11 @@ local Transition = require("./Transition")
 local DEFAULT_TRAIL_DELAY = 0.1
 
 local function TransitionList(props, render)
+	-- The list's own node, open while its state is worked out: its RemovingList and its trail
+	-- are kept under it. The rows are rendered after it closes, into the caller's scope.
+	-- props.id is read here, before the per-row loop reuses props as each Transition's props.
+	local list = Miu.push(props.id)
+
 	local entries, removing = RemovingList(props.items, props.keyer)
 	local count = #entries
 
@@ -57,11 +67,9 @@ local function TransitionList(props, render)
 	local hasTrail = props.animateTrailDelay ~= nil or props.animateTrailDuration ~= nil
 
 	if hasTrail then
-		local node = Miu("trail")
-
 		if count == 0 then
 			-- Empty: the next population staggers from the start.
-			node.trailAlpha = 1
+			list.trailAlpha = 1
 		else
 			-- The alpha runs 1 (none revealed) → 0 (all revealed) at a constant
 			-- rate. Flipping `show` mid-flight just retargets it from the current
@@ -69,7 +77,7 @@ local function TransitionList(props, render)
 			-- reveal got to, and vice versa.
 			local totalDuration = props.animateTrailDuration
 				or (count - 1) * (props.animateTrailDelay or DEFAULT_TRAIL_DELAY)
-			local alpha = node.trailAlpha or 1
+			local alpha = list.trailAlpha or 1
 			local target = if listShown then 0 else 1
 
 			if totalDuration > 0 then
@@ -79,10 +87,12 @@ local function TransitionList(props, render)
 				alpha = target
 			end
 
-			node.trailAlpha = alpha
+			list.trailAlpha = alpha
 			trailIndex = math.ceil((1 - alpha) * count)
 		end
 	end
+
+	Miu.pop()
 
 	local anyVisible = false
 

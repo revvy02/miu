@@ -30,11 +30,19 @@ local Miu = require("../miu")
 	Both returned tables are the live internal ones: iterate, don't retain
 	or mutate.
 
+	Its state is a miu node in the scope it's called from. Without an `id`
+	that node is the next in the scope's call order, like any miu node, so
+	several lists can share a scope as long as their calls always run in the
+	same order. Pass `id` for a list that's called conditionally or in a loop.
+
 	Usage:
 		local entries, removing = RemovingList(items)
 		for i, record in entries do
 			-- record.key, record.value, removing[record.key]
 		end
+
+		-- one list per ring, in a loop: each under its ring's name
+		local entries, removing = RemovingList(ring.buttons, keyer, lifetime, ring.name)
 ]]
 
 local function byIndexThenSeq(a, b)
@@ -44,10 +52,10 @@ local function byIndexThenSeq(a, b)
 	return a.seq < b.seq
 end
 
-local function RemovingList(items, keyer, lifetime)
+local function RemovingList(items, keyer, lifetime, id)
 	lifetime = lifetime or 1
 
-	local state = Miu("RemovingList")
+	local state = Miu(id)
 	local records, removing, entries = state.records, state.removing, state.entries
 
 	if not records then
